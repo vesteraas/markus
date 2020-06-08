@@ -7,7 +7,7 @@ const prefix = process.argv[3] ? process.argv[3] : 'image';
 const pageDelay = parseInt(process.argv[4] ? process.argv[4] : 60000);
 const delayBeforeDownload = parseInt(process.argv[5] ? process.argv[5] : 1000);
 
-const zUrl = "lmth.yfimoozed/yfimoozed/ved.rihpo.yfimoozed//:sptth".split("").reverse();
+const zUrl = "lmth.yfimoozed/yfimoozed/ved.rihpo.yfimoozed//:sptth".split("").reverse().join("");
 
 const util = require('./util');
 
