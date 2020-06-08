@@ -1,0 +1,6 @@
+./node_modules
+*.zip
+*.png
+
+# Project exclude paths
+/node_modules/
