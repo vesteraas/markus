@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+const fs = require('fs');
 const puppeteer = require('puppeteer');
 const cliProgress = require('cli-progress');
 const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
@@ -11,7 +12,10 @@ program
     .requiredOption('-u, --url <url>', 'url of album')
     .option('-o, --output <pdf>', 'output PDF file', 'output.pdf')
     .option('-d, --delay <ms>', 'delay between each page in album', '10000')
-    .option('-n, --no-compress', 'no PDF compression', false);
+    .option('-n, --no-compress', 'no PDF compression', false)
+    .option('-m, --media <folder>', 'folder to store single images and pdfs', undefined)
+    .option('-s, --start <index>', 'start index', -1);
+
 
 program.parse(process.argv);
 
@@ -21,7 +25,18 @@ const util = require('./util');
 
 (async () => {
     try {
-        const temp = await util.createTempDir();
+        const tempDir = await util.createTempDir();
+
+        let mediaDir;
+
+        if (!program.media) {
+            mediaDir = mediaDir.path;
+        } else {
+            mediaDir = path.join(__dirname, program.media);
+            if (!fs.existsSync(mediaDir)) {
+                fs.mkdirSync(mediaDir);
+            }
+        }
 
         let browser = await puppeteer.launch({defaultViewport: null});
         let page = await browser.newPage();
@@ -49,7 +64,11 @@ const util = require('./util');
         let iterations = urls.length;
 
         for (let url of urls) {
-            console.log(`Downloading image ${n + 1} of ${urls.length}.`);
+            if (n++ < parseInt(program.start) - 1) {
+                continue;
+            }
+
+            console.log(`Downloading image ${n} of ${urls.length}.`);
 
             await page.goto(zUrl);
             await page.waitFor('input[type=url]');
@@ -74,8 +93,8 @@ const util = require('./util');
 
             bar.stop();
 
-            const pngFile = path.join(temp.path, `image_${n}.png`);
-            const pdfFile = path.join(temp.path, `image_${n}.pdf`);
+            const pngFile = path.join(mediaDir, `image_${n}.png`);
+            const pdfFile = path.join(mediaDir, `image_${n}.pdf`);
 
             console.log('Saving canvas...');
             const base64Data = await util.getCanvasAsBase64(page);
@@ -94,7 +113,7 @@ const util = require('./util');
             }
         }
 
-        const unCompressedPdf = path.join(temp.path, `${program.output}_compressed`);
+        const unCompressedPdf = path.join(tempDir.path, `${program.output}`);
 
         if (!program.compress) {
             console.log('Merging PDF files...');
@@ -106,8 +125,10 @@ const util = require('./util');
             await util.compressPDF(unCompressedPdf, `${program.output}`);
         }
 
-        console.log('Cleaning up...')
-        temp.cleanupCallback();
+        if (!program.media) {
+            console.log('Cleaning up...');
+            tempDir.cleanupCallback();
+        }
 
         await browser.close();
         console.log('Done!');
