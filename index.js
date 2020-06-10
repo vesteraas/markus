@@ -14,7 +14,8 @@ program
     .option('-d, --delay <ms>', 'delay between each page in album', '10000')
     .option('-n, --no-compress', 'no PDF compression', false)
     .option('-m, --media <folder>', 'folder to store single images and pdfs', undefined)
-    .option('-s, --start <index>', 'start index', -1);
+    .option('-s, --start <index>', 'start index', "-1")
+    .option('-e, --end <index>', 'end index', "-1");
 
 
 program.parse(process.argv);
@@ -50,7 +51,7 @@ const util = require('./util');
             process.exit(1);
         }
 
-        const urls = await util.getUrls(page, script);
+        const urls = util.urlSubsection(await util.getUrls(page, script), program.start, program.end);
 
         await browser.close();
 
@@ -64,11 +65,7 @@ const util = require('./util');
         let iterations = urls.length;
 
         for (let url of urls) {
-            if (n++ < parseInt(program.start) - 1) {
-                continue;
-            }
-
-            console.log(`Downloading image ${n} of ${urls.length}.`);
+            console.log(`Downloading image ${n + 1} of ${urls.length}.`);
 
             await page.goto(zUrl);
             await page.waitFor('input[type=url]');
@@ -93,8 +90,8 @@ const util = require('./util');
 
             bar.stop();
 
-            const pngFile = path.join(mediaDir, `image_${n}.png`);
-            const pdfFile = path.join(mediaDir, `image_${n}.pdf`);
+            const pngFile = path.join(mediaDir, `image_${n + 1}.png`);
+            const pdfFile = path.join(mediaDir, `image_${n + 1}.pdf`);
 
             console.log('Saving canvas...');
             const base64Data = await util.getCanvasAsBase64(page);

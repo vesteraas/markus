@@ -106,3 +106,21 @@ exports.compressPDF = (source, destination) => {
         });
     });
 };
+
+exports.urlSubsection = (urls, _startPage, _endPage) => {
+    let startPage;
+    if (parseInt(_startPage) === -1) {
+        startPage = 0;
+    } else {
+        startPage = parseInt(_startPage) - 1;
+    }
+
+    let endPage;
+    if (parseInt(_endPage) === -1) {
+        endPage = urls.length;
+    } else {
+        endPage = parseInt(_endPage);
+    }
+
+    return urls.slice(startPage, endPage);
+};
