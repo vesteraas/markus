@@ -17,7 +17,6 @@ program
     .option('-s, --start <index>', 'start index', "-1")
     .option('-e, --end <index>', 'end index', "-1");
 
-
 program.parse(process.argv);
 
 const zUrl = 'lmth.yfimoozed/yfimoozed/ved.rihpo.yfimoozed//:sptth'.split('').reverse().join('');
@@ -31,7 +30,7 @@ const util = require('./util');
         let mediaDir;
 
         if (!program.media) {
-            mediaDir = mediaDir.path;
+            mediaDir = tempDir.path;
         } else {
             mediaDir = path.join(__dirname, program.media);
             if (!fs.existsSync(mediaDir)) {
