@@ -20,14 +20,20 @@ exports.getScriptTagWithUrls = async (page) => {
     }
 }
 
-exports.getUrls = async (page, script) => {
+exports.getPages = async (page, script) => {
     let match = script.match(/\[(.*?)\]/s);
 
     let result = [];
 
+    let n=1;
+
     for (let untrimmedPart of match[1].trim().split('\n')) {
         let part = untrimmedPart.trim();
-        result.push(part.replace(/"/g, '').replace(/,/g, ''));
+
+        result.push({
+           page: n++,
+           url: part.replace(/"/g, '').replace(/,/g, '')
+        })
     }
 
     return result;
@@ -107,7 +113,7 @@ exports.compressPDF = (source, destination) => {
     });
 };
 
-exports.urlSubsection = (urls, _startPage, _endPage) => {
+exports.pageSlice = (pages, _startPage, _endPage) => {
     let startPage;
     if (parseInt(_startPage) === -1) {
         startPage = 0;
@@ -117,10 +123,10 @@ exports.urlSubsection = (urls, _startPage, _endPage) => {
 
     let endPage;
     if (parseInt(_endPage) === -1) {
-        endPage = urls.length;
+        endPage = pages.length;
     } else {
         endPage = parseInt(_endPage);
     }
 
-    return urls.slice(startPage, endPage);
+    return pages.slice(startPage, endPage);
 };
